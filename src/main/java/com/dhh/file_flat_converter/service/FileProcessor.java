@@ -3,6 +3,7 @@ package com.dhh.file_flat_converter.service;
 import com.dhh.file_flat_converter.config.Directory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,22 +15,22 @@ import java.nio.file.Path;
 public class FileProcessor {
 
     private final FileService fileService;
-    private final Directory directory;
 
+    public void process(Path path) {
+        log.info("Starting process files {}", path.getFileName());
 
-    public void process() {
-        log.info("Starting process files from directory {}", directory.getInput());
-        try {
-            var fileList = fileService.getFileFromDirectory(directory.getInput());
-            if (!fileList.isEmpty()) processFile(fileList.get(0));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void processFile(Path path) {
-
         //leer el fichero
+
+        /*
+        crear los mapper
+        leer el fichero y guardarlo en un arrayList
+        con comparableFuture hacer llamadas a un servicio
+        esperar respuesta del micro
+        y si es fallo que no se ha guardado en BD se crea un ficjero con los que han fallado
+         */
 
     }
 
