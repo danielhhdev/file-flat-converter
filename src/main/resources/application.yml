@@ -1,0 +1,10 @@
+spring:
+  application:
+   name: "file-flat-converter"
+
+
+application:
+  directories:
+    input: ""
+    output: ""
+    fail: ""
