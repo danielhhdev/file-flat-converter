@@ -5,6 +5,6 @@ spring:
 
 application:
   directories:
-    input: ""
-    output: ""
-    fail: ""
+    input: "C:/Proyectos/file-flat-converter/input"
+    output: "C:/Proyectos/file-flat-converter/output"
+    fail: "C:/Proyectos/file-flat-converter/fail"

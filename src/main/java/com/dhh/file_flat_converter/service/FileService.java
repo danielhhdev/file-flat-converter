@@ -41,6 +41,17 @@ public class FileService {
         }
     }
 
+    public List<String> readFile(String input) {
+        Path path = Paths.get(input);
+        try {
+            return Files.readAllLines(path);
+        } catch (IOException e) {
+            log.info("Error when reading the file {}", path.getFileName());
+            throw new FileServiceException("Error when reading the file" + path.getFileName(), e);
+        }
+    }
+
+
     //borrar fichero
 
 
