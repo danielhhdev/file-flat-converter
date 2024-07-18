@@ -1,13 +1,20 @@
 package com.dhh.file_flat_converter.service;
 
+import com.dhh.file_flat_converter.exception.FIleParseException;
+import com.dhh.file_flat_converter.exception.ReadException;
 import com.dhh.file_flat_converter.model.PaymentIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.dhh.file_flat_converter.constant.Constant.START_TRANSACTION;
@@ -24,44 +31,28 @@ public class FileProcessor {
         log.info("Starting process file {}", path.getFileName());
         var paymentList = readFileIntoArray(path);
 
-        //var paymentIOList = parseToPayment();
+        processPayments(paymentList);
 
 
     }
+    /*
+    mapeo el pago
+    lo envio a otro micro
+    si falla creo un nack con los fallos y especifico cual
+     */
+    private void processPayments(List<String> list) {
 
-    private void parseToPayment() {
+       var pay = parseService.parseData(list.get(0), PaymentIO.class);
 
-        /*
-        mapeo el pago
-        lo envio a otro micro
-        si falla creo un nack con los fallos y especifico cual
-         */
+
+
     }
 
     private List<String> readFileIntoArray(Path path) {
         log.info("Reading file {}", path.getFileName());
-
         return fileService.readFile(String.valueOf(path))
                 .stream()
-                .filter(line1 -> line1.startsWith(START_TRANSACTION))
+                .filter(line -> line.startsWith(START_TRANSACTION))
                 .collect(Collectors.toList());
-
-
-//        try (BufferedReader inputFile = new BufferedReader(new InputStreamReader(fileInputStrean, StandardCharsets.UTF_8))) {
-//            String line = inputFile.readLine();
-//            while (line != null) {
-//                Optional.of(line)
-//                        .filter(line1 -> line1.startsWith(START_TRANSACTION))
-//                        .map(line1 -> parseService.parseData(line1, PaymentIO.class))
-//                        .ifPresent(paymentIOList::add);
-//
-//                line = inputFile.readLine();
-//            }
-//        } catch (Exception e) {
-//            log.warn("Error when reading file {}", path.getFileName());
-//            throw new ReadException("Error when reading file", e);
-//        }
-
     }
-
 }

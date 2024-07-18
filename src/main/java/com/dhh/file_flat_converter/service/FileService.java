@@ -46,7 +46,7 @@ public class FileService {
         try {
             return Files.readAllLines(path);
         } catch (IOException e) {
-            log.info("Error when reading the file {}", path.getFileName());
+            log.warn("Error when reading the file {}", path.getFileName());
             throw new FileServiceException("Error when reading the file" + path.getFileName(), e);
         }
     }

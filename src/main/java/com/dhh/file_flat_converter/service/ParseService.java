@@ -1,5 +1,6 @@
 package com.dhh.file_flat_converter.service;
 
+import com.dhh.file_flat_converter.exception.FIleParseException;
 import org.beanio.StreamFactory;
 import org.beanio.Unmarshaller;
 import org.beanio.builder.StreamBuilder;
@@ -15,11 +16,13 @@ public class ParseService {
         String recordName = clazz.getSimpleName();
 
         StreamBuilder builder = new StreamBuilder(recordName)
-                .format("fixedLength")
+                .format("fixedlength")
                 .addRecord(clazz);
         factory.define(builder);
 
         Unmarshaller unmarshaller = factory.createUnmarshaller(recordName);
         return clazz.cast(unmarshaller.unmarshal(linea));
+
+
     }
 }
