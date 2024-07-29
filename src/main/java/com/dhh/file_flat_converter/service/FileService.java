@@ -4,12 +4,8 @@ import com.dhh.file_flat_converter.exception.FileServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +26,6 @@ public class FileService {
     }
 
     //coger fichero
-
     public InputStream getFile(String input) {
         Path path = Paths.get(input);
         try {
@@ -41,6 +36,7 @@ public class FileService {
         }
     }
 
+    //Leer fichero
     public List<String> readFile(String input) {
         Path path = Paths.get(input);
         try {
@@ -56,7 +52,22 @@ public class FileService {
 
 
     //guardar fichero
-
+    public void saveFile(File file, String destinationPath) {
+        try {
+            Files.copy(file.toPath(), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     //escribir fichero
+    public void writeLineToFile(String line, String filePath) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            writer.write(line);
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
