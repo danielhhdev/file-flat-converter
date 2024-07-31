@@ -31,34 +31,49 @@ public class FileProcessor {
         var end1 = Instant.now();
 
         var start2 = Instant.now();
-        processPayments2(path);
+        processAllPayments(path);
         var end2 = Instant.now();
 
         var duration1 = Duration.between(start1, end1);
         var duration2 = Duration.between(start2, end2);
 
-        System.out.println("Duracion1: "+duration1.getNano());
-        System.out.println("Duracion2: "+duration2.getNano());
+        System.out.println("Duracion1: " + duration1.getNano());
+        System.out.println("Duracion2: " + duration2.getNano());
 
         log.info("End to process file {}", path.getFileName());
     }
 
-    private void processPayments2(Path path) {
-        readFileAsync(path).thenAccept(lines -> {
-            List<CompletableFuture<PaymentIO>> futures = lines.stream()
-                    .map(ParseService::parsePaymentIOAsync).toList();
+    private void processAllPayments(Path path) {
+        readFileAsync(path)                                                                         // lee el archivo de forma asincrona, usa un hilo aparte
+                .thenAccept(lines -> {                                                              // cuando termina de procesarlo empieza con la siguiente tarea
+                    List<CompletableFuture<Void>> futures = lines
+                            .stream()                                                                       // se crea un stream de lineas
+                            .map(this::processPayment)                                                      // cada linea se procesa en un hilo
+                            .toList();                                                                      // se guarda en una lista
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();              // esa lista de completablesFutures se espera a que terminen todos para seguir
+                });
+    }
 
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    /*
+    En este metodo se crea un CompletableFuture para procesar cada payment
+    es decir, cuando ejecutemos esto se creara un hilo por cada payment
+     */
+    private CompletableFuture<Void> processPayment(String payment) {
+        return CompletableFuture.runAsync(() -> {
+            ParseService.parseData(payment, PaymentIO.class);
+            // TODO llamada a micro esterno para guardarlo en Base de datos
         });
     }
+
+    //TODO añadir control de excepciones
 
 
     private void processPayments(Path path) {
 
-        var paymentList = readFileIntoArray(path);
+        var paymentList = readFileIntoArray(path);                                       // se lee el fichero con el hilo principal
 
         List<CompletableFuture<Void>> parallel = new ArrayList<>();
-        paymentList.forEach(payment -> {
+        paymentList.forEach(payment -> {                                                            // recorremos todas las lineas y por cada linea parseamos en un hilo diferente
             CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
                 try {
                     ParseService.parseData(payment, PaymentIO.class);
@@ -66,11 +81,11 @@ public class FileProcessor {
                     log.info("Error when payment has been parsed. {}", payment);
                 }
             }, demoPool);
-            parallel.add(task);
+            parallel.add(task);                                                                      // añadimos cada completableFuture en la lista
 
         });
 
-        CompletableFuture.allOf(parallel.toArray(new CompletableFuture[0])).join();
+        CompletableFuture.allOf(parallel.toArray(new CompletableFuture[0])).join();                  // esperamos a que todos terminen para continuar
     }
 
     private List<String> readFileIntoArray(Path path) {
@@ -79,6 +94,6 @@ public class FileProcessor {
     }
 
     public CompletableFuture<List<String>> readFileAsync(Path path) {
-        return CompletableFuture.supplyAsync(() -> fileService.readFile(String.valueOf(path)));
+        return CompletableFuture.supplyAsync(() -> fileService.readFile(String.valueOf(path)), demoPool);
     }
 }
