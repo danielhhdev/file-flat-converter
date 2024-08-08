@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 public class FileProcessor {
 
     private final FileService fileService;
-    private final ExecutorService demoPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+    private final ExecutorService demoPool = Executors.newFixedThreadPool(1000);
 
     public void process(Path path) {
         log.info("Starting process file {}", path.getFileName());
@@ -62,7 +62,7 @@ public class FileProcessor {
         return CompletableFuture.runAsync(() -> {
             ParseService.parseData(payment, PaymentIO.class);
             // TODO llamada a micro esterno para guardarlo en Base de datos
-        });
+        }, demoPool);
     }
 
     //TODO añadir control de excepciones
